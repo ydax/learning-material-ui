@@ -5,70 +5,103 @@ import Typography from '@material-ui/core/Typography'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
+import IconButton from '@material-ui/core/IconButton'
+import Delete from '@material-ui/icons/Delete'
+import Edit from '@material-ui/icons/Edit'
+import Form from './Form'
+import { withStyles } from '@material-ui/core/styles'
 
-const styles = {
+const styles = theme => ({
+  Grid: {
+    padding: 6,
+  },
   Paper: { 
     padding: 20, 
-    marginTop: 10, 
-    marginBottom: 10,
+    marginTop: 5, 
     height: 500,
     overflowY: 'auto'
   }
-}
+})
 
-export default ({ 
-    exercises, 
-    category, 
-    onSelect, 
-    exercise: { 
-      id, 
-      title = 'Welcome!',
-      description = 'Please select an exercise from the list on the left'
-    } 
-  }) =>
-  <Grid container spacing={2}>
-    <Grid item sm>
-      <Paper style={styles.Paper}>
-        { exercises.map(([group, exercises]) => 
-          !category || category === group
-            ? <Fragment key={group}>
-                <Typography 
-                  variant="h6"
-                  style={{textTransform: 'capitalize'}}
+export default withStyles(styles)(
+  ({ 
+      classes,
+      exercises, 
+      category, 
+      onSelect, 
+      editMode,
+      exercise,
+      exercise: { 
+        id, 
+        title = 'Welcome!',
+        description = 'Please select an exercise from the list on the left'
+      },
+      onEdit,
+      onDelete,
+      onSelectEdit
+    }) =>
+    <Grid container className={classes.Grid} spacing={1}>
+      <Grid item xs={12} sm={6}>
+        <Paper className={classes.Paper}>
+          { exercises.map(([group, exercises]) => 
+            !category || category === group
+              ? <Fragment key={group}>
+                  <Typography 
+                    variant="h6"
+                    style={{textTransform: 'capitalize'}}
+                  >
+                    { group }
+                  </Typography>
+                  <List component="ul">
+                    { exercises.map(({ title, id }) =>
+                      <ListItem
+                        key={id}
+                        onClick={() => onSelect(id)}
+                        button
+                      >
+                      <ListItemText 
+                        primary={title} 
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton onClick={() => onDelete(id)}>
+                          <Delete />
+                        </IconButton>
+                        <IconButton onClick={() => onSelectEdit(id)}>
+                          <Edit />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                    ) }
+                  </List>
+                </Fragment>
+              : null
+          )}
+        </Paper>
+      </Grid>
+      <Grid item xs={12} sm={6}>
+        <Paper className={classes.Paper}>
+          { editMode 
+            ? <Form
+              muscles={category}
+              onSubmit={onEdit}
+              exercise={exercise}
+            />
+            : <>
+                <Typography
+                  variant="h5"
                 >
-                  { group }
+                  { title }
                 </Typography>
-                <List component="ul">
-                  { exercises.map(({ title, id }) =>
-                    <ListItem
-                      key={id}
-                      onClick={() => onSelect(id)}
-                      button
-                    >
-                    <ListItemText 
-                      primary={title} 
-                    />
-                  </ListItem>
-                  ) }
-                </List>
-              </Fragment>
-            : null
-        )}
-      </Paper>
+                <Typography
+                  variant="subtitle1"
+                  style={{marginTop: 20}}
+                >
+                  { description }
+                </Typography>
+            </>
+          }
+        </Paper>
+      </Grid>
     </Grid>
-    <Grid item sm>
-      <Paper style={styles.Paper}>
-        <Typography
-          variant="h5"
-        >
-          { title }
-        </Typography>
-        <Typography
-          variant="subtitle1"
-          style={{marginTop: 20}}
-        >
-          { description }
-        </Typography>
-      </Paper>
-    </Grid>
-  </Grid>
+  )
